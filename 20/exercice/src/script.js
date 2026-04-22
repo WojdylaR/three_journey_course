@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import GUI from 'lil-gui'
+import CANNON from 'cannon'
+
+
 
 /**
  * Debug
@@ -15,7 +18,6 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
-
 /**
  * Textures
  */
@@ -30,6 +32,46 @@ const environmentMapTexture = cubeTextureLoader.load([
     '/textures/environmentMaps/0/pz.png',
     '/textures/environmentMaps/0/nz.png'
 ])
+
+// Physique:
+
+const world = new CANNON.World()
+world.gravity.set(0, -9.82, 0)
+
+const defaultMaterial = new CANNON.Material('default')
+
+const defaultContactMaterial = new CANNON.ContactMaterial(
+    defaultMaterial,
+    defaultMaterial,
+    {
+        firction: 0.1,
+        restitution: 0.7
+    }
+)
+
+world.addContactMaterial(defaultContactMaterial)
+world.defaultContactMaterial = defaultContactMaterial
+
+const sphereShape = new CANNON.Sphere(0.5)
+const sphereBody = new CANNON.Body({
+    mass: 1,
+    position: new CANNON.Vec3(0, 3, 0),
+    shape: sphereShape,
+})
+
+sphereBody.applyLocalForce(new CANNON.Vec3(150, 0, 0), new CANNON.Vec3(0, 0, 0))
+world.addBody(sphereBody)
+
+const floorShape = new CANNON.Plane()
+const floorBody = new CANNON.Body({})
+floorBody.mass = 0
+floorBody.addShape(floorShape)
+floorBody.quaternion.setFromAxisAngle(
+    new CANNON.Vec3(- 1, 0, 0),
+    Math.PI / 2
+)
+
+world.addBody(floorBody)
 
 /**
  * Test sphere
@@ -132,9 +174,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
+let oldElapseTime = 0
+
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - oldElapseTime
+    oldElapseTime = elapsedTime
+
+    // Update Physique World
+    sphereBody.applyForce(new CANNON.Vec3(-0.5, 0, 0), sphereBody.position)
+
+    world.step(1 / 60, deltaTime, 3)
+    
+
+    sphere.position.copy(sphereBody.position)
 
     // Update controls
     controls.update()
