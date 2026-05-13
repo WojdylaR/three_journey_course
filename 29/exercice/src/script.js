@@ -21,7 +21,7 @@ const scene = new THREE.Scene()
  * Water
  */
 // Geometry
-const waterGeometry = new THREE.PlaneGeometry(2, 2, 128, 128)
+const waterGeometry = new THREE.PlaneGeometry(2, 2, 1024, 1024)
 
 const debugObj = {
     depthColor: '#186691',
@@ -34,7 +34,7 @@ const waterMaterial = new THREE.ShaderMaterial({
     fragmentShader: waterFragmentShader,
     uniforms: {
         uBigWaveElevation: {
-            value: 0.5
+            value: 0.2
         },
         uBigWavesFrequency: {
             value: new THREE.Vector2(4, 1.5)
@@ -54,11 +54,17 @@ const waterMaterial = new THREE.ShaderMaterial({
             value: new THREE.Color(debugObj.surfaceColor)
         },
         uColorOffset: {
-            value: 0.08
+            value: 0.2
         },
         uColorMultiplier: {
-            value: 12
-        }
+            value: 5
+        },
+        uFrequencySmallWave : {
+            value: 4
+        },
+        uHeightWave : {
+            value: 1.5
+        },
     }
 })
 
@@ -66,8 +72,10 @@ gui.add(waterMaterial.uniforms.uBigWaveElevation, 'value').min(0).max(1).step(0.
 gui.add(waterMaterial.uniforms.uBigWavesFrequency.value, 'x').min(0).max(20).step(0.1).name('uBigWavesFrequencyX')
 gui.add(waterMaterial.uniforms.uBigWavesFrequency.value, 'y').min(0).max(20).step(0.1).name('uBigWavesFrequencyY')
 gui.add(waterMaterial.uniforms.uSpeedWave, 'value').min(0).max(20).step(0.1).name('uSpeedWavex')
-gui.add(waterMaterial.uniforms.uColorOffset, 'value').min(0).max(100).step(0.1).name('uColorOffset')
+gui.add(waterMaterial.uniforms.uColorOffset, 'value').min(0).max(10).step(0.1).name('uColorOffset')
 gui.add(waterMaterial.uniforms.uColorMultiplier, 'value').min(0).max(100).step(0.1).name('uColorMultiplier')
+gui.add(waterMaterial.uniforms.uFrequencySmallWave, 'value').min(0).max(10).step(1).name('uFrequencySmallWave')
+gui.add(waterMaterial.uniforms.uHeightWave, 'value').min(0).max(10).step(0.001).name('uHeightWave')
 
 gui.addColor(debugObj, 'depthColor').onChange((color) => {
     waterMaterial.uniforms.uDepthColor.value.set(debugObj.depthColor);

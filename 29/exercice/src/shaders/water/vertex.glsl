@@ -3,6 +3,8 @@ uniform vec2 uBigWavesFrequency;
 
 uniform float uTime;
 uniform float uSpeedWave;
+uniform float uFrequencySmallWave;
+uniform float uHeightWave;
 
 varying float vElevation;
 
@@ -96,7 +98,10 @@ void main() {
                       sin(modelPosition.z * uBigWavesFrequency.y + uTime * uSpeedWave) *
                       uBigWaveElevation;
 
-    elevation *= cnoise(vec3(modelPosition.xz, uTime));
+    for(float i = 1.0; i<= 4.0; i++) {
+        elevation -= abs(cnoise(vec3(modelPosition.xz * uFrequencySmallWave * i, uTime * 0.55)) * 0.15 / (i * uHeightWave));
+    };
+
     modelPosition.y += elevation;
 
     vec4 viewPosition = viewMatrix * modelPosition;
